@@ -1,4 +1,4 @@
-module github.com/example/heladeria
+module github.com/yourusername/survey-app
 
 go 1.23
 

@@ -2,9 +2,9 @@
 set -e
 
 # Configuration
-REPO_URL="${REPO_URL:-https://github.com/yourusername/go_htmx_gorm_compose.git}"
+REPO_URL="${REPO_URL:-https://github.com/yourusername/survey-app.git}"
 BRANCH="${BRANCH:-main}"
-DEPLOY_DIR="${DEPLOY_DIR:-/opt/heladeria}"
+DEPLOY_DIR="${DEPLOY_DIR:-/opt/myapp}"
 ENV_FILE="${ENV_FILE:-${DEPLOY_DIR}/.env}"
 
 # Colors for output

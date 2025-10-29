@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
-	"github.com/example/heladeria/internal/models"
+	"github.com/yourusername/survey-app/internal/models"
 )
 
 type AdminHandler struct {

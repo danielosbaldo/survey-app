@@ -1,7 +1,7 @@
 package seed
 
 import (
-	"github.com/example/heladeria/internal/models"
+	"github.com/yourusername/survey-app/internal/models"
 	"gorm.io/gorm"
 )
 
