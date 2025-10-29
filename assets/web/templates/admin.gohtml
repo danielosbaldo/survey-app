@@ -1,0 +1,295 @@
+{{define "admin.gohtml"}}
+{{ template "header.gohtml" . }}
+
+  <div class="min-h-screen flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r flex flex-col py-6 px-4 space-y-6">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center overflow-hidden border border-gray-200">
+          <img src="/assets/web/images/logo.png" alt="La Michoacana" class="w-8 h-8 ">
+        </div>
+        <span class="text-xl font-bold">LaMichoacana Admin</span>
+      </div>
+      <nav class="flex-1 flex flex-col gap-2">
+  <a href="#dashboard" hx-get="/admin/dashboard-section" hx-target="#admin-refresh" hx-swap="innerHTML" class="py-2 px-3 rounded-lg hover:bg-pink-50 font-medium flex items-center gap-2"><svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6m-6 0v6m0 0H7m6 0h6"/></svg>Dashboard</a>
+        <a href="#shops" hx-get="/admin/shops-section" hx-target="#admin-refresh" hx-swap="innerHTML" class="py-2 px-3 rounded-lg hover:bg-pink-50 font-medium flex items-center gap-2"><svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>Sucursales</a>
+        <a href="#employees" hx-get="/admin/employees-section" hx-target="#admin-refresh" hx-swap="innerHTML" class="py-2 px-3 rounded-lg hover:bg-pink-50 font-medium flex items-center gap-2"><svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 15c2.485 0 4.797.657 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Empleados</a>
+        <a href="#questions" hx-get="/admin/questions-section" hx-target="#admin-refresh" hx-swap="innerHTML" class="py-2 px-3 rounded-lg hover:bg-pink-50 font-medium flex items-center gap-2"><svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Preguntas</a>
+      </nav>
+      <div class="text-xs text-gray-400 mt-auto">Go + HTMX + Gorm (Docker)</div>
+    </aside>
+      <main class="flex-1 p-8 bg-gray-50 min-h-screen">
+        <div id="admin-refresh" class="mt-6">
+          <!-- Dashboard will be loaded here by default via JS below -->
+        </div>
+        <script>
+          // Global edit functions - accessible from dynamically loaded content
+          function editShop(id, name, slug, ciudadId) {
+            // First ensure we're on the shops section
+            htmx.ajax('GET', '/admin/shops-section', '#admin-refresh').then(() => {
+              // Wait a moment for the section to load, then find the form
+              setTimeout(() => {
+                const form = document.querySelector('#admin-refresh form');
+                console.log('Found form:', form); // Debug log
+                console.log('Form attributes before edit:', {
+                  action: form.getAttribute('action'),
+                  method: form.getAttribute('method'),
+                  hxPost: form.getAttribute('hx-post'),
+                  hxPut: form.getAttribute('hx-put')
+                });
+                if (form) {
+                  // Remove ALL conflicting attributes
+                  form.removeAttribute('action');
+                  form.removeAttribute('method');
+                  form.removeAttribute('hx-post');
+                  form.removeAttribute('hx-target');
+                  form.removeAttribute('hx-swap');
+                  form.removeAttribute('hx-on::after-request');
+
+                  // Force HTMX to re-process the element
+                  htmx.process(form);
+
+                  // Set new attributes for edit mode
+                  form.setAttribute('hx-put', '/admin/shops/' + id);
+                  form.setAttribute('hx-target', '#shops-content');
+                  form.setAttribute('hx-swap', 'outerHTML');
+
+                  // Force HTMX to re-process after setting new attributes
+                  htmx.process(form);
+
+                  console.log('Form attributes after edit setup:', {
+                    action: form.getAttribute('action'),
+                    method: form.getAttribute('method'),
+                    hxPost: form.getAttribute('hx-post'),
+                    hxPut: form.getAttribute('hx-put'),
+                    hxTarget: form.getAttribute('hx-target'),
+                    allAttributes: Array.from(form.attributes).map(attr => `${attr.name}="${attr.value}"`).join(', ')
+                  });
+
+                  // Fill form fields
+                  const nameInput = form.querySelector('input[name="name"]');
+                  const slugInput = form.querySelector('input[name="slug"]');
+                  const ciudadSelect = form.querySelector('select[name="ciudad_id"]');
+
+                  if (nameInput) nameInput.value = name;
+                  if (slugInput) slugInput.value = slug;
+                  if (ciudadSelect) ciudadSelect.value = ciudadId;
+
+                  // Change submit button text
+                  const submitBtn = form.querySelector('button[type="submit"]');
+                  if (submitBtn) {
+                    submitBtn.textContent = 'Actualizar Sucursal';
+                    submitBtn.className = 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium';
+
+                    // Add cancel button
+                    if (!form.querySelector('.cancel-btn')) {
+                      const cancelBtn = document.createElement('button');
+                      cancelBtn.type = 'button';
+                      cancelBtn.className = 'cancel-btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium ml-2';
+                      cancelBtn.textContent = 'Cancelar';
+                      cancelBtn.onclick = () => resetShopForm();
+                      submitBtn.parentNode.appendChild(cancelBtn);
+                    }
+                  }
+                } else {
+                  console.error('No form found for editing shop');
+                }
+              }, 100); // Small delay to ensure DOM is updated
+            });
+          }
+
+          function resetShopForm() {
+            const form = document.querySelector('#admin-refresh form');
+            if (form) {
+              // Restore original form attributes for create mode
+              form.removeAttribute('hx-put');
+              form.setAttribute('hx-post', '/admin/shops');
+              form.setAttribute('hx-target', '#shops-content');
+              form.setAttribute('hx-swap', 'outerHTML');
+              form.setAttribute('hx-on::after-request', 'this.reset()');
+
+              // Reset form fields
+              form.reset();
+
+              // Reset submit button
+              const submitBtn = form.querySelector('button[type="submit"]');
+              if (submitBtn) {
+                submitBtn.textContent = 'Crear Sucursal';
+                submitBtn.className = 'bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium';
+              }
+
+              // Remove cancel button
+              const cancelBtn = form.querySelector('.cancel-btn');
+              if (cancelBtn) cancelBtn.remove();
+            }
+          }
+
+          function editEmployee(id, name, active, shopIds) {
+            // First ensure we're on the employees section
+            htmx.ajax('GET', '/admin/employees-section', '#admin-refresh').then(() => {
+              // Wait a moment for the section to load, then find the form
+              setTimeout(() => {
+                const form = document.querySelector('#admin-refresh form');
+                console.log('Found employee form:', form); // Debug log
+                if (form) {
+                  // Remove the action attribute to prevent conflicts with hx-put
+                  form.removeAttribute('action');
+                  form.removeAttribute('method');
+
+                  // Update form to use hx-put
+                  form.setAttribute('hx-put', '/admin/employees/' + id);
+                  form.setAttribute('hx-target', '#employees-content');
+
+                  // Fill form fields
+                  const nameInput = form.querySelector('input[name="name"]');
+                  const activeInput = form.querySelector('input[name="active"]');
+
+                  if (nameInput) nameInput.value = name;
+                  if (activeInput) activeInput.checked = active;
+
+                  // Select shop options in multiple select
+                  const shopSelect = form.querySelector('select[name="shop_ids"]');
+                  if (shopSelect) {
+                    console.log('Shop select found, setting values:', shopIds); // Debug log
+                    // Clear all selections first
+                    Array.from(shopSelect.options).forEach(option => option.selected = false);
+                    // Select the shops for this employee
+                    Array.from(shopSelect.options).forEach(option => {
+                      if (shopIds.includes(parseInt(option.value))) {
+                        option.selected = true;
+                      }
+                    });
+                  }
+
+                  // Change submit button text
+                  const submitBtn = form.querySelector('button[type="submit"]');
+                  if (submitBtn) {
+                    submitBtn.textContent = 'Actualizar Empleado';
+                    submitBtn.className = 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium';
+
+                    // Add cancel button
+                    if (!form.querySelector('.cancel-btn')) {
+                      const cancelBtn = document.createElement('button');
+                      cancelBtn.type = 'button';
+                      cancelBtn.className = 'cancel-btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium ml-2';
+                      cancelBtn.textContent = 'Cancelar';
+                      cancelBtn.onclick = () => resetEmployeeForm();
+                      submitBtn.parentNode.appendChild(cancelBtn);
+                    }
+                  }
+                } else {
+                  console.error('No form found for editing employee');
+                }
+              }, 100);
+            });
+          }
+
+          function resetEmployeeForm() {
+            const form = document.querySelector('#admin-refresh form');
+            if (form) {
+              // Restore original form attributes for create mode
+              form.removeAttribute('hx-put');
+              form.setAttribute('hx-post', '/admin/employees');
+              form.setAttribute('hx-target', '#employees-content');
+              form.setAttribute('hx-swap', 'outerHTML');
+
+              // Reset form fields
+              form.reset();
+
+              // Reset submit button
+              const submitBtn = form.querySelector('button[type="submit"]');
+              if (submitBtn) {
+                submitBtn.textContent = 'Crear Empleado';
+                submitBtn.className = 'bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium';
+              }
+
+              // Remove cancel button
+              const cancelBtn = form.querySelector('.cancel-btn');
+              if (cancelBtn) cancelBtn.remove();
+            }
+          }
+
+          function editQuestion(id, prompt, type, order) {
+            // First ensure we're on the questions section
+            htmx.ajax('GET', '/admin/questions-section', '#admin-refresh').then(() => {
+              // Wait a moment for the section to load, then find the form
+              setTimeout(() => {
+                const form = document.querySelector('#admin-refresh form');
+                console.log('Found question form:', form); // Debug log
+                if (form) {
+                  // Remove the action attribute to prevent conflicts with hx-put
+                  form.removeAttribute('action');
+                  form.removeAttribute('method');
+
+                  // Update form to use hx-put
+                  form.setAttribute('hx-put', '/admin/questions/' + id);
+                  form.setAttribute('hx-target', '#questions-content');
+
+                  // Fill form fields
+                  const promptInput = form.querySelector('input[name="prompt"]');
+                  const typeSelect = form.querySelector('select[name="type"]');
+                  const orderInput = form.querySelector('input[name="order"]');
+
+                  if (promptInput) promptInput.value = prompt;
+                  if (typeSelect) typeSelect.value = type;
+                  if (orderInput) orderInput.value = order;
+
+                  // Change submit button text
+                  const submitBtn = form.querySelector('button[type="submit"]');
+                  if (submitBtn) {
+                    submitBtn.textContent = 'Actualizar Pregunta';
+                    submitBtn.className = 'bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium';
+
+                    // Add cancel button
+                    if (!form.querySelector('.cancel-btn')) {
+                      const cancelBtn = document.createElement('button');
+                      cancelBtn.type = 'button';
+                      cancelBtn.className = 'cancel-btn bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium ml-2';
+                      cancelBtn.textContent = 'Cancelar';
+                      cancelBtn.onclick = () => resetQuestionForm();
+                      submitBtn.parentNode.appendChild(cancelBtn);
+                    }
+                  }
+                } else {
+                  console.error('No form found for editing question');
+                }
+              }, 100);
+            });
+          }
+
+          function resetQuestionForm() {
+            const form = document.querySelector('#admin-refresh form');
+            if (form) {
+              // Restore original form attributes for create mode
+              form.removeAttribute('hx-put');
+              form.setAttribute('hx-post', '/admin/questions');
+              form.setAttribute('hx-target', '#questions-content');
+              form.setAttribute('hx-swap', 'outerHTML');
+
+              // Reset form fields
+              form.reset();
+
+              // Reset submit button
+              const submitBtn = form.querySelector('button[type="submit"]');
+              if (submitBtn) {
+                submitBtn.textContent = 'Crear Pregunta';
+                submitBtn.className = 'bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium';
+              }
+
+              // Remove cancel button
+              const cancelBtn = form.querySelector('.cancel-btn');
+              if (cancelBtn) cancelBtn.remove();
+            }
+          }
+
+          // Load dashboard by default on page load
+          document.addEventListener('DOMContentLoaded', function() {
+            htmx.ajax('GET', '/admin/dashboard-section', '#admin-refresh');
+          });
+        </script>
+      </main>
+  </div>
+  {{ template "footer.gohtml" .}}
+</body>
+</html>
+{{end}}

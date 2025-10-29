@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@source "./assets/web/templates/**/*.{gohtml,html}";
+
+@theme {
+  --color-primary: #D81B60;
+  --color-secondary: #C2185B;
+  --color-background: #F8F8F8;
+  --color-text: #311B0B;
+}

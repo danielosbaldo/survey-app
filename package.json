@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.1.16",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6"
+  },
+  "name": "go_htmx_gorm_compose",
+  "description": "## Run with Docker ```bash docker compose up --build",
+  "version": "1.0.0",
+  "main": "postcss.config.js",
+  "scripts": {
+    "build:css": "./tailwindcss-linux-x64 -i ./assets/web/css/tailwind.css -o ./assets/web/css/app.css --minify",
+    "watch:css": "./tailwindcss-linux-x64 -i ./assets/web/css/tailwind.css -o ./assets/web/css/app.css --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

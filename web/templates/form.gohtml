@@ -1,0 +1,50 @@
+{{ template "base.gohtml" . }}
+
+{{define "content"}}
+<div class="bg-white rounded-2xl shadow-sm p-4 my-3">
+  <h2 class="text-lg font-medium m-0 mb-3">Evalúa tu experiencia 🍦</h2>
+  <form method="post" action="/form">
+    <div class="mb-3">
+      <label class="block text-sm mb-2 text-gray-500">Sucursal</label>
+      <select name="shop_id" class="w-full p-3 border border-gray-300 rounded-xl text-sm">
+        {{range .Shops}}
+          <option value="{{.ID}}" {{if eq $.ShopID .ID}}selected{{end}}>{{.Name}}</option>
+        {{end}}
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="block text-sm mb-2 text-gray-500">Selecciona el empleado que te atendió</label>
+      <select name="employee_id" class="w-full p-3 border border-gray-300 rounded-xl text-sm">
+        {{range .Employees}}
+          <option value="{{.ID}}">{{.Name}}</option>
+        {{end}}
+      </select>
+    </div>
+
+    {{range .Questions}}
+    <div class="mb-3">
+      <label class="block text-sm mb-2 text-gray-500">{{.Prompt}}</label>
+      {{if eq .Type "radio"}}
+        <div class="grid grid-cols-2 gap-2">
+        {{range .Choices}}
+          <label class="flex items-center gap-2"><input type="radio" name="q_{{$.ShopID}}_{{.QuestionID}}" value="{{.Value}}"> <span class="text-sm">{{.Label}}</span></label>
+        {{end}}
+        </div>
+      {{else if eq .Type "scale"}}
+        <div class="grid grid-cols-5 gap-2">
+          <label class="flex items-center gap-2"><input type="radio" name="q_scale_{{.ID}}" value="1"> <span class="text-sm">1</span></label>
+          <label class="flex items-center gap-2"><input type="radio" name="q_scale_{{.ID}}" value="2"> <span class="text-sm">2</span></label>
+          <label class="flex items-center gap-2"><input type="radio" name="q_scale_{{.ID}}" value="3"> <span class="text-sm">3</span></label>
+          <label class="flex items-center gap-2"><input type="radio" name="q_scale_{{.ID}}" value="4"> <span class="text-sm">4</span></label>
+          <label class="flex items-center gap-2"><input type="radio" name="q_scale_{{.ID}}" value="5" checked> <span class="text-sm">5</span></label>
+        </div>
+      {{else if eq .Type "text"}}
+        <input type="text" name="q_text_{{.ID}}" placeholder="Escribe tu respuesta" class="w-full p-3 border border-gray-300 rounded-xl text-sm" />
+      {{end}}
+    </div>
+    {{end}}
+
+    <button class="w-full bg-pink-700 text-white border-0 p-3 rounded-xl font-semibold mt-2">Enviar evaluación</button>
+  </form>
+</div>
+{{end}}

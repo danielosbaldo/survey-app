@@ -1,0 +1,11 @@
+{{define "shops_dropdown.gohtml"}}
+<div id="employee-shops-dropdown-container">
+  <select name="shop_ids" multiple class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400">
+    {{if .Shops}}
+      {{range .Shops}}<option value="{{.ID}}">{{.Name}}</option>{{end}}
+    {{else}}
+      <option value="">{{.Message}}</option>
+    {{end}}
+  </select>
+</div>
+{{end}}

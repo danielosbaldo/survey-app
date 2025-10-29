@@ -1,0 +1,101 @@
+{{define "employee_edit_row.gohtml"}}
+<tr id="employee-row-{{.Employee.ID}}" data-employee-id="{{.Employee.ID}}">
+  <td colspan="4" class="px-6 py-4 bg-gray-50">
+    <div class="bg-blue-50 border border-blue-200 rounded p-2 mb-2 text-xs">
+      Debug: Employee ID={{.Employee.ID}}, Name={{.Employee.Name}},
+      Ciudad={{.SelectedCiudadID}},
+      Shops={{len .Employee.Shops}},
+      Available={{len .AvailableShops}},
+      Ciudades={{len .Ciudades}}
+    </div>
+    <form hx-put="/admin/employees/{{.Employee.ID}}"
+          hx-target="#employees-content"
+          hx-swap="outerHTML"
+          class="space-y-4 bg-white p-4 rounded-lg border border-gray-300">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+          <input name="name"
+                 value="{{.Employee.Name}}"
+                 required
+                 class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Ciudad</label>
+          <select name="ciudad_id"
+                  id="edit-ciudad-select-{{.Employee.ID}}"
+                  hx-get="/admin/shops-by-ciudad"
+                  hx-target="#edit-shops-dropdown-{{.Employee.ID}}"
+                  hx-swap="outerHTML"
+                  hx-trigger="change"
+                  hx-include="this"
+                  hx-vals='{"employee_id": "{{.Employee.ID}}"}'
+                  class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400">
+            <option value="">Seleccionar ciudad</option>
+            {{if .Ciudades}}
+              {{range .Ciudades}}
+                <option value="{{.ID}}" {{if eq .ID $.SelectedCiudadID}}selected{{end}}>{{.Nombre}}</option>
+              {{end}}
+            {{end}}
+          </select>
+          <div class="text-xs text-gray-500 mt-1">Selected: {{.SelectedCiudadID}}, Total: {{len .Ciudades}}</div>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Sucursales</label>
+        <div id="edit-shops-dropdown-{{.Employee.ID}}">
+          <select name="shop_ids"
+                  multiple
+                  size="5"
+                  class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400">
+            {{if .AvailableShops}}
+              {{$isSelected := .IsShopSelected}}
+              {{range .AvailableShops}}
+                <option value="{{.ID}}" {{if call $isSelected .ID}}selected{{end}}>{{.Name}}</option>
+              {{end}}
+            {{else}}
+              <option value="" disabled>{{if .SelectedCiudadID}}No hay sucursales en esta ciudad{{else}}Primero selecciona una ciudad{{end}}</option>
+            {{end}}
+          </select>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">
+          Mantén presionada Ctrl (Windows) o Cmd (Mac) para seleccionar varias.
+          ({{len .AvailableShops}} disponibles)
+        </p>
+      </div>
+
+      <div class="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
+        <input type="checkbox"
+               name="active"
+               value="true"
+               {{if .Employee.Active}}checked{{end}}
+               class="w-4 h-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded">
+        <label class="text-sm text-gray-700 font-medium">Empleado activo</label>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button type="submit"
+                class="flex-1 bg-pink-700 hover:bg-pink-800 transition text-white px-4 py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          Guardar Cambios
+        </button>
+        <button type="button"
+                hx-get="/admin/employees-section"
+                hx-target="closest .mb-6"
+                hx-swap="outerHTML"
+                class="flex-1 bg-gray-500 hover:bg-gray-600 transition text-white px-4 py-3 rounded-xl font-semibold flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </td>
+</tr>
+{{end}}

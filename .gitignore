@@ -1,0 +1,60 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+server
+*.test
+*.out
+
+# Go workspace file
+go.work
+
+# Build artifacts
+/bin/
+/dist/
+
+# Dependencies
+/vendor/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker volumes
+pgdata/
+
+# Temporary files
+tmp/
+temp/
+
+# Node modules (for Tailwind)
+node_modules/
+
+# Compiled CSS (generated from Tailwind)
+web/css/app.css
+assets/web/css/app.css
+
+# Tailwind binary (platform-specific)
+tailwindcss-*

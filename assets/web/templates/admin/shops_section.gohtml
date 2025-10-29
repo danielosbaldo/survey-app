@@ -1,0 +1,21 @@
+{{define "shops_section.gohtml"}}
+<div class="mb-6">
+  <h2 class="text-xl font-bold mb-4">Sucursales</h2>
+  <!-- Formulario para agregar sucursal -->
+  <form hx-post="/admin/shops" hx-target="#shops-content" hx-swap="outerHTML" hx-on::after-request="this.reset()" class="space-y-2 mb-6">
+    <label class="block text-sm font-medium text-gray-700">Nombre</label>
+    <input name="name" placeholder="Ej: Centro" required class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400" />
+    <label class="block text-sm font-medium text-gray-700">Slug (opcional)</label>
+    <input name="slug" placeholder="Ej: centro" class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400" />
+    <label class="block text-sm font-medium text-gray-700">Ciudad</label>
+    <select name="ciudad_id" required class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400">
+      {{range .Ciudades}}<option value="{{.ID}}">{{.Nombre}}</option>{{end}}
+    </select>
+    <button class="w-full bg-pink-700 hover:bg-pink-800 transition text-white border-0 p-3 rounded-xl font-semibold mt-2 flex items-center justify-center gap-2">Guardar sucursal</button>
+  </form>
+
+  <div id="shops-content">
+    {{template "shops_table.gohtml" .}}
+  </div>
+</div>
+{{end}}

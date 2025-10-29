@@ -1,0 +1,24 @@
+{{define "dashboard_section.gohtml"}}
+<div class="mb-10">
+  <h1 class="text-2xl font-bold mb-6">Dashboard</h1>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center">
+      <div class="text-3xl font-bold text-pink-600 mb-2">{{.TotalResponses}}</div>
+      <div class="text-sm text-gray-500">Respuestas totales</div>
+    </div>
+    <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center">
+      <div class="text-3xl font-bold text-pink-600 mb-2">{{.AvgAmabilidad}}</div>
+      <div class="text-sm text-gray-500">Promedio Amabilidad</div>
+    </div>
+    <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center">
+      <div class="text-3xl font-bold text-pink-600 mb-2">{{.TotalEmpleados}}</div>
+      <div class="text-sm text-gray-500">Empleados activos</div>
+    </div>
+  </div>
+  <!-- Placeholder for charts -->
+  <div class="bg-white rounded-xl shadow p-6">
+    <h2 class="text-lg font-semibold mb-4">Respuestas por pregunta</h2>
+    <div id="dashboard-charts" class="h-64 flex items-center justify-center text-gray-400">[Gráficas próximamente]</div>
+  </div>
+</div>
+{{end}}

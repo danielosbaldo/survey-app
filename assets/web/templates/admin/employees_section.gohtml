@@ -1,0 +1,121 @@
+{{define "employees_section.gohtml"}}
+<div class="mb-6" hx-on:htmx:afterSettle="htmx.process(this)">
+  <h2 class="text-xl font-bold mb-4">Empleados</h2>
+  <!-- Formulario para agregar empleado -->
+  <form hx-post="/admin/employees" hx-target="#employees-content" hx-swap="outerHTML" class="space-y-2 mb-6" id="employee-form">
+    <label class="block text-sm font-medium text-gray-700">Nombre</label>
+    <input name="name" placeholder="Ej: Juan Pérez" required class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400" />
+    <label class="block text-sm font-medium text-gray-700">Ciudad</label>
+    <select name="ciudad_id" id="ciudad-select-empleado"
+            hx-get="/admin/shops-by-ciudad"
+            hx-target="#employee-shops-dropdown-container"
+            hx-swap="outerHTML"
+            hx-trigger="change delay:100ms"
+            hx-include="this"
+            class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400">
+      <option value="">Seleccionar ciudad</option>
+      {{range .Ciudades}}<option value="{{.ID}}">{{.Nombre}}</option>{{end}}
+    </select>
+    <label class="block text-sm font-medium text-gray-700">Sucursales</label>
+    <div id="employee-shops-dropdown-container">
+      <select name="shop_ids" multiple class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400">
+        <option value="">Primero selecciona una ciudad</option>
+      </select>
+    </div>
+    <p class="text-xs text-gray-500">Primero selecciona una ciudad. Mantén presionada Ctrl (Windows) o Cmd (Mac) para seleccionar varias sucursales.</p>
+    <label class="block text-sm font-medium text-gray-700">Activo</label>
+    <div class="flex items-center space-x-2">
+      <input type="checkbox" name="active" value="true" checked class="w-4 h-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded">
+      <span class="text-sm text-gray-700">Empleado activo</span>
+    </div>
+    <button class="w-full bg-pink-700 hover:bg-pink-800 transition text-white border-0 p-3 rounded-xl font-semibold mt-2 flex items-center justify-center gap-2">Guardar empleado</button>
+  </form>
+
+  <div id="employees-content">
+    {{template "employees_table.gohtml" .}}
+  </div>
+</div>
+
+<script>
+// Reset form after successful employee creation
+document.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.detail.target.id === 'employees-content') {
+        const form = document.getElementById('employee-form');
+        if (form) {
+            form.reset();
+            // Reset the shops dropdown to initial state
+            const container = document.getElementById('employee-shops-dropdown-container');
+            if (container) {
+                container.innerHTML = `
+                    <select name="shop_ids" multiple class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400">
+                        <option value="">Primero selecciona una ciudad</option>
+                    </select>
+                `;
+            }
+        }
+    }
+});
+
+// Debug when this script loads
+console.log('employees_section script loaded');
+
+// Debug when section is rendered
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded - checking for employee container');
+    const container = document.getElementById('employee-shops-dropdown-container');
+    console.log('Container found on DOM load?', container !== null);
+});
+
+// Simple HTMX debugging
+document.addEventListener('htmx:targetError', function(evt) {
+    console.error('HTMX Target Error - target:', evt.detail.target);
+    console.error('Element that triggered:', evt.detail.elt);
+
+    // Check if our specific target exists globally
+    const container = document.getElementById('employee-shops-dropdown-container');
+    console.log('employee-shops-dropdown-container exists globally?', container !== null);
+
+    // Check if target exists within the form
+    const form = evt.detail.elt.closest('form');
+    const containerInForm = form ? form.querySelector('#employee-shops-dropdown-container') : null;
+    console.log('employee-shops-dropdown-container exists in form?', containerInForm !== null);
+
+    // Log all elements with similar IDs for debugging
+    const allContainers = document.querySelectorAll('[id*="dropdown-container"]');
+    console.log('All dropdown containers found:', allContainers.length);
+    allContainers.forEach((el, i) => console.log(`Container ${i}:`, el.id, el));
+
+    // Log the entire form HTML for debugging
+    console.log('Form HTML:', form ? form.innerHTML : 'No form found');
+});
+
+document.addEventListener('htmx:beforeRequest', function(evt) {
+    console.log('HTMX request starting to:', evt.detail.requestConfig?.path);
+    console.log('Request target:', evt.detail.target);
+
+    // Verify target exists before request
+    const targetId = evt.detail.target;
+    if (targetId && typeof targetId === 'string' && targetId.startsWith('#')) {
+        const targetEl = document.querySelector(targetId);
+        console.log('Target element found before request?', targetEl !== null);
+    }
+});
+
+document.addEventListener('htmx:afterRequest', function(evt) {
+    console.log('HTMX request completed, status:', evt.detail.xhr?.status);
+});
+
+// Debug when employees section is loaded via HTMX
+document.addEventListener('htmx:afterSettle', function(evt) {
+    console.log('HTMX afterSettle event');
+    const container = document.getElementById('employee-shops-dropdown-container');
+    console.log('Container exists after settle?', container !== null);
+
+    // Re-process HTMX for dynamic content
+    if (evt.detail.elt.querySelector && evt.detail.elt.querySelector('#employee-shops-dropdown-container')) {
+        console.log('Processing HTMX for dynamically loaded employee section');
+        htmx.process(evt.detail.elt);
+    }
+});
+</script>
+{{end}}

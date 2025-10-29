@@ -1,0 +1,13 @@
+{{define "header.gohtml"}}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{if .Title}}{{.Title}} – {{end}}LaMichoacana</title>
+  <link rel="stylesheet" href="/assets/web/css/app.css">
+  <script src="/assets/web/js/htmx.min.js"></script>
+  {{if .ExtraHead}}{{.ExtraHead}}{{end}}
+</head>
+<body class="bg-gray-50 text-amber-900 font-sans">
+{{end}}

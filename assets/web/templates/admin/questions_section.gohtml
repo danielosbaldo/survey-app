@@ -1,0 +1,23 @@
+{{define "questions_section.gohtml"}}
+<div class="mb-6">
+  <h2 class="text-xl font-bold mb-4">Preguntas globales</h2>
+  <!-- Formulario para agregar pregunta -->
+  <form hx-post="/admin/questions" hx-target="#questions-content" hx-swap="outerHTML" hx-on::after-request="this.reset()" class="space-y-2 mb-6">
+    <label class="block text-sm font-medium text-gray-700">Texto de la pregunta</label>
+    <input name="prompt" placeholder="Ej: ¿Cómo fue tu experiencia?" required class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400" />
+    <label class="block text-sm font-medium text-gray-700">Tipo</label>
+    <select name="type" class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400">
+      <option value="radio">Opción única</option>
+      <option value="scale">Escala 1–5</option>
+      <option value="text">Texto libre</option>
+    </select>
+    <label class="block text-sm font-medium text-gray-700">Orden (número)</label>
+    <input name="order" placeholder="Ej: 1" class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400" />
+    <button class="w-full bg-pink-700 hover:bg-pink-800 transition text-white border-0 p-3 rounded-xl font-semibold mt-2 flex items-center justify-center gap-2">Guardar pregunta</button>
+  </form>
+
+  <div id="questions-content">
+    {{template "questions_table.gohtml" .}}
+  </div>
+</div>
+{{end}}

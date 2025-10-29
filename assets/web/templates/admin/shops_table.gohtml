@@ -1,0 +1,31 @@
+{{define "shops_table.gohtml"}}
+<!-- Tabla de sucursales -->
+<table class="min-w-full text-xs border rounded-xl overflow-hidden">
+  <thead class="bg-gray-100">
+    <tr><th class="p-2 text-left">ID</th><th class="p-2 text-left">Nombre</th><th class="p-2 text-left">Slug</th><th class="p-2 text-left">Ciudad</th><th class="p-2 text-left">URL Encuesta</th><th class="p-2 text-left">Acciones</th></tr>
+  </thead>
+  <tbody>
+    {{range .Shops}}
+    <tr class="border-b">
+      <td class="p-2">{{.ID}}</td>
+      <td class="p-2">{{.Name}}</td>
+      <td class="p-2">{{.Slug}}</td>
+      <td class="p-2">{{if .Ciudad}}{{.Ciudad.Nombre}}{{else}}-{{end}}</td>
+      <td class="p-2">
+        {{if .Ciudad}}
+          <a href="/sucursal/{{.Ciudad.Nombre}}/{{.Slug}}/encuesta" target="_blank" class="text-blue-600 hover:text-blue-800 text-xs">/sucursal/{{.Ciudad.Nombre}}/{{.Slug}}/encuesta</a>
+        {{else}}
+          <span class="text-gray-400 text-xs">-</span>
+        {{end}}
+      </td>
+      <td class="p-2">
+        <div class="flex gap-1">
+          <button onclick="editShop({{.ID}}, '{{.Name}}', '{{.Slug}}', {{if .Ciudad}}{{.Ciudad.ID}}{{else}}0{{end}})" class="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs">Editar</button>
+          <button hx-delete="/admin/shops/{{.ID}}" hx-target="#shops-content" hx-confirm="¿Eliminar sucursal '{{.Name}}'?" class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs">Eliminar</button>
+        </div>
+      </td>
+    </tr>
+    {{else}}<tr><td colspan="6" class="p-2 text-gray-400">Sin sucursales</td></tr>{{end}}
+  </tbody>
+</table>
+{{end}}

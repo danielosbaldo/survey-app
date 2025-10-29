@@ -1,0 +1,113 @@
+{{ template "base.gohtml" . }}
+
+{{define "content"}}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const input = document.getElementById('employee_name');
+  const datalist = document.getElementById('employee-list');
+  if (!input || !datalist) return;
+  const options = Array.from(datalist.options).map(opt => opt.value);
+  let currentFocus = -1;
+  input.addEventListener('input', function() {
+    const val = this.value.toLowerCase();
+    datalist.innerHTML = '';
+    options.filter(opt => opt.toLowerCase().includes(val)).forEach(opt => {
+      const option = document.createElement('option');
+      option.value = opt;
+      datalist.appendChild(option);
+    });
+  });
+  input.addEventListener('keydown', function(e) {
+    const visibleOptions = Array.from(datalist.options);
+    if (e.key === 'ArrowDown') {
+      currentFocus = (currentFocus + 1) % visibleOptions.length;
+      input.value = visibleOptions[currentFocus]?.value || input.value;
+      e.preventDefault();
+    } else if (e.key === 'ArrowUp') {
+      currentFocus = (currentFocus - 1 + visibleOptions.length) % visibleOptions.length;
+      input.value = visibleOptions[currentFocus]?.value || input.value;
+      e.preventDefault();
+    } else if (e.key === 'Enter') {
+      if (currentFocus > -1 && visibleOptions[currentFocus]) {
+        input.value = visibleOptions[currentFocus].value;
+      }
+      currentFocus = -1;
+    } else {
+      currentFocus = -1;
+    }
+  });
+});
+</script>
+
+<div class="max-w-md mx-auto">
+  {{if .Error}}
+  <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-4">
+    <strong class="font-bold">Error:</strong>
+    <span class="block sm:inline">{{.Error}}</span>
+  </div>
+  {{end}}
+  <div class="bg-white rounded-2xl shadow p-6 my-3">
+    <h2 class="text-lg font-medium m-0 mb-3">Evalúa tu experiencia 🍦</h2>
+    <form method="post" action="" class="space-y-6">
+      <div>
+        <label class="block text-base font-semibold text-pink-700 mb-2">Nombre del empleado que te atendió</label>
+        <input name="employee_name" id="employee_name" type="text" value="{{index .PreservedData "employee_name"}}" class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400" placeholder="Escribe el nombre..." autocomplete="off" list="employee-list" />
+        <datalist id="employee-list">
+          {{range .Employees}}<option value="{{.Name}}">{{end}}
+        </datalist>
+      </div>
+      {{range .Questions}}
+      {{$questionID := .ID}}
+      <div class="mb-6">
+        <label class="block text-base font-semibold text-pink-700 mb-2">{{.Prompt}}</label>
+        {{if eq .Type "radio"}}
+          <div class="flex flex-col gap-3">
+            {{range .Choices}}
+              <label class="flex items-center bg-gray-100 rounded-xl px-4 py-3 text-base active:bg-pink-100 focus-within:ring-2 focus-within:ring-pink-400">
+                <input type="radio" name="q{{$questionID}}" value="{{.Value}}" {{if eq (index $.PreservedData (print "q" $questionID)) .Value}}checked{{end}} class="form-radio text-pink-600 w-6 h-6 mr-3" required>
+                <span class="flex-1">{{.Label}}</span>
+              </label>
+            {{end}}
+          </div>
+        {{else if eq .Type "scale"}}
+          <div class="flex flex-row justify-between gap-2 mt-2">
+            {{if .Choices}}
+              {{range .Choices}}
+                <label class="flex flex-col items-center flex-1">
+                  <input type="radio" name="q{{$questionID}}" value="{{.Value}}" {{if eq (index $.PreservedData (print "q" $questionID)) .Value}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" required>
+                  <span class="text-xs">{{.Label}}</span>
+                </label>
+              {{end}}
+            {{else}}
+              <label class="flex flex-col items-center flex-1">
+                <input type="radio" name="q{{$questionID}}" value="1" {{if eq (index $.PreservedData (print "q" $questionID)) "1"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" required>
+                <span class="text-xs">1</span>
+              </label>
+              <label class="flex flex-col items-center flex-1">
+                <input type="radio" name="q{{$questionID}}" value="2" {{if eq (index $.PreservedData (print "q" $questionID)) "2"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" required>
+                <span class="text-xs">2</span>
+              </label>
+              <label class="flex flex-col items-center flex-1">
+                <input type="radio" name="q{{$questionID}}" value="3" {{if eq (index $.PreservedData (print "q" $questionID)) "3"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" required>
+                <span class="text-xs">3</span>
+              </label>
+              <label class="flex flex-col items-center flex-1">
+                <input type="radio" name="q{{$questionID}}" value="4" {{if eq (index $.PreservedData (print "q" $questionID)) "4"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" required>
+                <span class="text-xs">4</span>
+              </label>
+              <label class="flex flex-col items-center flex-1">
+                <input type="radio" name="q{{$questionID}}" value="5" {{if eq (index $.PreservedData (print "q" $questionID)) "5"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" required>
+                <span class="text-xs">5</span>
+              </label>
+            {{end}}
+          </div>
+        {{else if eq .Type "text"}}
+          <input type="text" name="q{{$questionID}}" value="{{index $.PreservedData (print "q" $questionID)}}" class="w-full p-4 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-pink-400" placeholder="Tu respuesta..." required />
+        {{end}}
+      </div>
+      {{end}}
+      <button class="w-full bg-pink-700 hover:bg-pink-800 transition text-white border-0 p-3 rounded-xl font-semibold flex items-center justify-center gap-2"><svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 13l4 4L19 7'/></svg>Enviar evaluación</button>
+    </form>
+  </div>
+</div>
+{{end}}
