@@ -161,7 +161,6 @@ go mod tidy
 ## 📚 Additional Resources
 
 - [SECURITY.md](./SECURITY.md) - Comprehensive security guidelines
-- [SANITIZATION_SUMMARY.md](./SANITIZATION_SUMMARY.md) - What we changed and why
 - [.gitignore](./.gitignore) - Files excluded from git
 - [Gitleaks](https://github.com/gitleaks/gitleaks) - Secret scanning tool
 

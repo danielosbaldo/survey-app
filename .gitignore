@@ -62,13 +62,25 @@ assets/web/css/app.css
 # Tailwind binary (platform-specific)
 tailwindcss-*
 
+# Company branding / logos (use placeholder in repo)
+assets/web/images/logo.png
+assets/web/images/logo.jpg
+assets/web/images/logo.svg
+assets/**/logo.png
+assets/**/logo.jpg
+assets/**/logo.svg
+
 # Sensitive or personal information
 *secret*
 *private*
 *credentials*
 *config.local*
 *SANITIZATION_SUMMARY*
-*DEPLOYMENT*
+
+# Deployment files (contain server IPs, usernames, etc.)
+deploy*.sh
+*DEPLOYMENT*.md
+
 # Backup files
 *.bak
 *.backup
