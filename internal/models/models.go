@@ -15,6 +15,10 @@ type Shop struct {
 	UpdatedAt time.Time
 }
 
+func (Shop) TableName() string {
+	return "shops"
+}
+
 type Employee struct {
 	ID        uint    `gorm:"primaryKey"`
 	Name      string  `gorm:"not null"`
@@ -24,10 +28,18 @@ type Employee struct {
 	UpdatedAt time.Time
 }
 
+func (Employee) TableName() string {
+	return "employees"
+}
+
 // Tabla intermedia para la relación muchos-a-muchos
 type EmployeeShop struct {
 	EmployeeID uint `gorm:"primaryKey"`
 	ShopID     uint `gorm:"primaryKey"`
+}
+
+func (EmployeeShop) TableName() string {
+	return "employee_shops"
 }
 
 type Question struct {
@@ -40,12 +52,20 @@ type Question struct {
 	UpdatedAt time.Time
 }
 
+func (Question) TableName() string {
+	return "questions"
+}
+
 type Choice struct {
 	ID         uint   `gorm:"primaryKey"`
 	QuestionID uint   `gorm:"index;not null"`
 	Label      string `gorm:"not null"`
 	Value      string `gorm:"not null"`
 	OrderNum   int
+}
+
+func (Choice) TableName() string {
+	return "choices"
 }
 
 type Response struct {
@@ -55,6 +75,10 @@ type Response struct {
 	Answers    JSONB `gorm:"type:jsonb"`
 	UserAgent  string
 	CreatedAt  time.Time
+}
+
+func (Response) TableName() string {
+	return "responses"
 }
 
 type JSONB map[string]any

@@ -18,8 +18,8 @@ func (h *SurveyHandler) GetForm(c *gin.Context) {
 	ciudad := c.Param("ciudad")
 
 	var shop models.Shop
-	if err := h.DB.Joins("JOIN ciudades ON shops.ciudad_id = ciudades.id").
-		Where("LOWER(ciudades.nombre) = LOWER(?) AND shops.slug = ?", ciudad, slug).
+	if err := h.DB.Joins("JOIN ciudads ON shops.ciudad_id = ciudads.id").
+		Where("LOWER(ciudads.nombre) = LOWER(?) AND shops.slug = ?", ciudad, slug).
 		First(&shop).Error; err != nil {
 		c.String(404, "Sucursal no encontrada")
 		return

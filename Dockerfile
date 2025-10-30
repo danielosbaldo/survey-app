@@ -21,6 +21,9 @@ COPY . .
 # Build Tailwind CSS
 RUN /usr/local/bin/tailwindcss -i ./assets/web/css/tailwind.css -o ./assets/web/css/app.css --minify
 
+# Verify the CSS was generated
+RUN ls -lh ./assets/web/css/app.css && echo "CSS file size:" && wc -c ./assets/web/css/app.css
+
 # Build with caching
 RUN CGO_ENABLED=0 GOOS=linux go build -o server ./cmd/server
 
