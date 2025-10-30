@@ -1,10 +1,12 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@source "./assets/web/templates/**/*.{gohtml,html}";
-
-@theme {
-  --color-primary: #D81B60;
-  --color-secondary: #C2185B;
-  --color-background: #F8F8F8;
-  --color-text: #311B0B;
+@layer base {
+  :root {
+    --color-primary: #D81B60;
+    --color-secondary: #C2185B;
+    --color-background: #F8F8F8;
+    --color-text: #311B0B;
+  }
 }

@@ -3,12 +3,13 @@ FROM golang:1.23-alpine AS build
 
 WORKDIR /app
 
-# Install wget for downloading Tailwind CLI
-RUN apk add --no-cache wget
+# Install wget and curl for downloading Tailwind CLI
+RUN apk add --no-cache wget curl
 
-# Download Tailwind CLI
-RUN wget -O /usr/local/bin/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64 && \
-    chmod +x /usr/local/bin/tailwindcss
+# Download Tailwind CLI (standalone binary)
+RUN curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.1/tailwindcss-linux-x64 && \
+    chmod +x tailwindcss-linux-x64 && \
+    mv tailwindcss-linux-x64 /usr/local/bin/tailwindcss
 
 # Copy go mod files first for better caching
 COPY go.mod go.sum ./
