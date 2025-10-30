@@ -1,4 +1,4 @@
-module github.com/yourusername/survey-app
+module github.com/danielosbaldo/survey-app
 
 go 1.23
 

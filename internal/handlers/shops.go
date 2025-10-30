@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
-	"github.com/yourusername/survey-app/internal/models"
+	"github.com/danielosbaldo/survey-app/internal/models"
 )
 
 type ShopHandler struct {

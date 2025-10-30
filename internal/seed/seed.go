@@ -1,7 +1,7 @@
 package seed
 
 import (
-	"github.com/yourusername/survey-app/internal/models"
+	"github.com/danielosbaldo/survey-app/internal/models"
 	"gorm.io/gorm"
 )
 

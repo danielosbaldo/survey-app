@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/yourusername/survey-app/assets"
+	"github.com/danielosbaldo/survey-app/assets"
 )
 
 var templates *template.Template
