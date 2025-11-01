@@ -33,7 +33,7 @@ func (s *Server) Router() *gin.Engine {
 
 	// Survey handlers
 	survey := &handlers.SurveyHandler{DB: s.DB}
-	g.GET("/sucursal/:ciudad/:slug/encuesta", survey.GetForm)
+	g.GET("/sucursal/*path", survey.GetFormRouter)
 	g.POST("/sucursal/:ciudad/:slug/encuesta", survey.PostForm)
 
 	// Admin handlers

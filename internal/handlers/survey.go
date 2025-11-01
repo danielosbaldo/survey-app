@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -11,6 +12,39 @@ import (
 
 type SurveyHandler struct {
 	DB *gorm.DB
+}
+
+func (h *SurveyHandler) GetFormRouter(c *gin.Context) {
+	path := c.Param("path")
+	// Remove leading slash
+	path = strings.TrimPrefix(path, "/")
+
+	// Split the path
+	parts := strings.Split(path, "/")
+
+	// Check if it's the short URL pattern: /:slug/encuesta
+	if len(parts) == 2 && parts[1] == "encuesta" {
+		slug := parts[0]
+		var shop models.Shop
+		if err := h.DB.Preload("Ciudad").Where("slug = ?", slug).First(&shop).Error; err != nil {
+			c.String(404, "Sucursal no encontrada")
+			return
+		}
+		// Redirect to the full URL with ciudad
+		c.Redirect(302, fmt.Sprintf("/sucursal/%s/%s/encuesta", shop.Ciudad.Nombre, slug))
+		return
+	}
+
+	// Check if it's the full URL pattern: /:ciudad/:slug/encuesta
+	if len(parts) == 3 && parts[2] == "encuesta" {
+		// Set params for GetForm to use
+		c.Params = append(c.Params, gin.Param{Key: "ciudad", Value: parts[0]})
+		c.Params = append(c.Params, gin.Param{Key: "slug", Value: parts[1]})
+		h.GetForm(c)
+		return
+	}
+
+	c.String(404, "Ruta no encontrada")
 }
 
 func (h *SurveyHandler) GetForm(c *gin.Context) {
