@@ -45,6 +45,56 @@ func (h *QuestionHandler) Update(c *gin.Context) {
 		return
 	}
 
+	// Handle choices
+	choiceIDs := c.PostFormArray("choice_ids[]")
+	choiceOrders := c.PostFormArray("choice_orders[]")
+	choiceValues := c.PostFormArray("choice_values[]")
+	choiceLabels := c.PostFormArray("choice_labels[]")
+
+	// Track existing choice IDs to keep
+	keepChoiceIDs := make(map[uint]bool)
+
+	// Update or create choices
+	for i := 0; i < len(choiceIDs); i++ {
+		if i >= len(choiceValues) || i >= len(choiceLabels) {
+			continue
+		}
+
+		choiceID, _ := strconv.Atoi(choiceIDs[i])
+		choiceOrder, _ := strconv.Atoi(choiceOrders[i])
+
+		if choiceID == 0 {
+			// Create new choice
+			newChoice := models.Choice{
+				QuestionID: uint(qID),
+				Label:      choiceLabels[i],
+				Value:      choiceValues[i],
+				OrderNum:   choiceOrder,
+			}
+			h.DB.Create(&newChoice)
+		} else {
+			// Update existing choice
+			h.DB.Model(&models.Choice{}).Where("id = ?", choiceID).Updates(models.Choice{
+				Label:    choiceLabels[i],
+				Value:    choiceValues[i],
+				OrderNum: choiceOrder,
+			})
+			keepChoiceIDs[uint(choiceID)] = true
+		}
+	}
+
+	// Delete choices that were removed
+	if len(keepChoiceIDs) > 0 {
+		var idsToKeep []uint
+		for id := range keepChoiceIDs {
+			idsToKeep = append(idsToKeep, id)
+		}
+		h.DB.Where("question_id = ? AND id NOT IN ?", qID, idsToKeep).Delete(&models.Choice{})
+	} else {
+		// Delete all choices if none were kept
+		h.DB.Where("question_id = ?", qID).Delete(&models.Choice{})
+	}
+
 	renderQuestionsTable(c, h.DB)
 }
 
@@ -74,6 +124,27 @@ func (h *QuestionHandler) CreateChoice(c *gin.Context) {
 	h.DB.Create(&models.Choice{QuestionID: uint(qid), Label: label, Value: value, OrderNum: order})
 
 	RenderTemplate(c, "partials_admin_refresh.gohtml", getAdminData(h.DB))
+}
+
+func (h *QuestionHandler) Edit(c *gin.Context) {
+	id := c.Param("id")
+	qID, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(400, gin.H{"error": "Invalid question ID"})
+		return
+	}
+
+	var question models.Question
+	if err := h.DB.Preload("Choices", func(db *gorm.DB) *gorm.DB {
+		return db.Order("order_num ASC")
+	}).First(&question, qID).Error; err != nil {
+		c.JSON(404, gin.H{"error": "Question not found"})
+		return
+	}
+
+	RenderTemplate(c, "question_edit_row.gohtml", gin.H{
+		"Question": question,
+	})
 }
 
 func (h *QuestionHandler) Section(c *gin.Context) {

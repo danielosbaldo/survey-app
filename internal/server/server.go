@@ -67,6 +67,7 @@ func (s *Server) Router() *gin.Engine {
 
 		// Questions
 		admin.GET("/questions-section", questionHandler.Section)
+		admin.GET("/questions/:id/edit", questionHandler.Edit)
 		admin.POST("/questions", questionHandler.Create)
 		admin.PUT("/questions/:id", questionHandler.Update)
 		admin.DELETE("/questions/:id", questionHandler.Delete)
