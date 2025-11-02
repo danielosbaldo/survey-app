@@ -17,7 +17,44 @@ func (h *QuestionHandler) Create(c *gin.Context) {
 	prompt := c.PostForm("prompt")
 	t := c.PostForm("type")
 	order, _ := strconv.Atoi(c.PostForm("order"))
-	h.DB.Create(&models.Question{Prompt: prompt, Type: t, OrderNum: order})
+
+	// Create the question
+	question := models.Question{Prompt: prompt, Type: t, OrderNum: order}
+	if err := h.DB.Create(&question).Error; err != nil {
+		c.JSON(500, gin.H{"error": "Failed to create question"})
+		return
+	}
+
+	// Handle choices if provided
+	choiceOrders := c.PostFormArray("choice_orders[]")
+	choiceValues := c.PostFormArray("choice_values[]")
+	choiceLabels := c.PostFormArray("choice_labels[]")
+
+	// Debug: Print what we received
+	if len(choiceValues) > 0 {
+		println("DEBUG: Received", len(choiceValues), "choices for question", question.ID)
+		for i := 0; i < len(choiceValues); i++ {
+			println("  Choice", i, ":", choiceValues[i], "=", choiceLabels[i])
+		}
+	} else {
+		println("DEBUG: No choices received for question", question.ID)
+	}
+
+	// Create choices
+	for i := 0; i < len(choiceValues); i++ {
+		if i >= len(choiceLabels) {
+			continue
+		}
+
+		choiceOrder, _ := strconv.Atoi(choiceOrders[i])
+		newChoice := models.Choice{
+			QuestionID: question.ID,
+			Label:      choiceLabels[i],
+			Value:      choiceValues[i],
+			OrderNum:   choiceOrder,
+		}
+		h.DB.Create(&newChoice)
+	}
 
 	renderQuestionsTable(c, h.DB)
 }
@@ -51,6 +88,17 @@ func (h *QuestionHandler) Update(c *gin.Context) {
 	choiceValues := c.PostFormArray("choice_values[]")
 	choiceLabels := c.PostFormArray("choice_labels[]")
 
+	// Debug: Print what we received
+	println("DEBUG UPDATE: Question ID:", qID)
+	println("DEBUG UPDATE: Received", len(choiceIDs), "choice IDs")
+	println("DEBUG UPDATE: Received", len(choiceValues), "choice values")
+	println("DEBUG UPDATE: Received", len(choiceLabels), "choice labels")
+	for i := 0; i < len(choiceIDs); i++ {
+		if i < len(choiceValues) && i < len(choiceLabels) {
+			println("  Choice", i, "ID:", choiceIDs[i], "Value:", choiceValues[i], "Label:", choiceLabels[i])
+		}
+	}
+
 	// Track existing choice IDs to keep
 	keepChoiceIDs := make(map[uint]bool)
 
@@ -71,7 +119,13 @@ func (h *QuestionHandler) Update(c *gin.Context) {
 				Value:      choiceValues[i],
 				OrderNum:   choiceOrder,
 			}
-			h.DB.Create(&newChoice)
+			if err := h.DB.Create(&newChoice).Error; err != nil {
+				println("  ERROR creating new choice:", err.Error())
+			} else {
+				println("  SUCCESS: Created new choice ID:", newChoice.ID)
+				// Add the new choice ID to the keep list so it doesn't get deleted
+				keepChoiceIDs[newChoice.ID] = true
+			}
 		} else {
 			// Update existing choice
 			h.DB.Model(&models.Choice{}).Where("id = ?", choiceID).Updates(models.Choice{

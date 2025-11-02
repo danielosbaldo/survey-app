@@ -92,7 +92,14 @@ func getAdminData(db *gorm.DB) gin.H {
 	var ciudades []models.Ciudad
 	db.Find(&ciudades)
 	var questions []models.Question
-	db.Order("order_num asc").Find(&questions)
+	db.Preload("Choices", func(db *gorm.DB) *gorm.DB {
+		return db.Order("order_num ASC")
+	}).Order("order_num asc").Find(&questions)
+
+	// Debug: Print how many choices each question has
+	for _, q := range questions {
+		println("DEBUG getAdminData: Question", q.ID, "has", len(q.Choices), "choices")
+	}
 
 	return gin.H{
 		"Rows":      rows,
