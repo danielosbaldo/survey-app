@@ -2,7 +2,7 @@
 <div class="mb-6">
   <h2 class="text-xl font-bold mb-4">Preguntas globales</h2>
   <!-- Formulario para agregar pregunta -->
-  <form id="new-question-form" hx-post="/admin/questions" hx-target="next #questions-content" hx-swap="outerHTML" hx-on::after-request="this.reset(); document.getElementById('new-choices-list').innerHTML = ''; const placeholder = document.createElement('div'); placeholder.className = 'text-xs text-gray-400 italic'; placeholder.id = 'no-choices-placeholder'; placeholder.textContent = 'No hay opciones. Haz clic en \&quot;+ Agregar opción\&quot; para añadir.'; document.getElementById('new-choices-list').appendChild(placeholder);" class="space-y-4 mb-6 bg-white p-4 rounded-lg border border-gray-300">
+  <form id="new-question-form" hx-post="/admin/questions" hx-target="next #questions-content" hx-swap="outerHTML" class="space-y-4 mb-6 bg-white p-4 rounded-lg border border-gray-300">
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-2">Texto de la pregunta</label>
       <input name="prompt" placeholder="Ej: ¿Cómo fue tu experiencia?" required class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400" />

@@ -106,7 +106,7 @@
               form.setAttribute('hx-post', '/admin/shops');
               form.setAttribute('hx-target', '#shops-content');
               form.setAttribute('hx-swap', 'outerHTML');
-              form.setAttribute('hx-on::after-request', 'this.reset()');
+              // Note: form reset is now handled by global htmx:afterRequest listener
 
               // Reset form fields
               form.reset();
@@ -282,6 +282,34 @@
             }
           }
 
+          // Reset forms after successful submission
+          document.body.addEventListener('htmx:afterRequest', function(event) {
+            if (!event.detail.successful) return;
+
+            // Reset new question form
+            if (event.detail.target && event.detail.target.id === 'questions-content') {
+              const form = document.getElementById('new-question-form');
+              if (form) {
+                form.reset();
+                const choicesList = document.getElementById('new-choices-list');
+                if (choicesList) {
+                  choicesList.innerHTML = '';
+                  const placeholder = document.createElement('div');
+                  placeholder.className = 'text-xs text-gray-400 italic';
+                  placeholder.id = 'no-choices-placeholder';
+                  placeholder.textContent = 'No hay opciones. Haz clic en "+ Agregar opción" para añadir.';
+                  choicesList.appendChild(placeholder);
+                }
+              }
+            }
+
+            // Reset new shop form
+            if (event.detail.target && event.detail.target.id === 'shops-content') {
+              const form = document.getElementById('new-shop-form');
+              if (form) form.reset();
+            }
+          });
+
           // Question choice management - Event delegation for all question edit actions
           document.addEventListener('change', function(e) {
             if (e.target.dataset.action === 'toggle-choices') {
@@ -299,7 +327,14 @@
             const target = e.target.closest('[data-action]');
             if (!target) return;
 
-            if (target.dataset.action === 'add-choice') {
+            if (target.dataset.action === 'edit-shop') {
+              e.preventDefault();
+              const id = target.dataset.shopId;
+              const name = target.dataset.shopName;
+              const slug = target.dataset.shopSlug;
+              const ciudadId = target.dataset.shopCiudad;
+              editShop(id, name, slug, ciudadId);
+            } else if (target.dataset.action === 'add-choice') {
               e.preventDefault();
               const questionId = target.dataset.questionId;
               const choicesList = document.getElementById('choices-list-' + questionId);

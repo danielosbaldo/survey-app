@@ -2,7 +2,7 @@
 <div class="mb-6">
   <h2 class="text-xl font-bold mb-4">Sucursales</h2>
   <!-- Formulario para agregar sucursal -->
-  <form hx-post="/admin/shops" hx-target="#shops-content" hx-swap="outerHTML" hx-on::after-request="this.reset()" class="space-y-2 mb-6">
+  <form id="new-shop-form" hx-post="/admin/shops" hx-target="#shops-content" hx-swap="outerHTML" class="space-y-2 mb-6">
     <label class="block text-sm font-medium text-gray-700">Nombre</label>
     <input name="name" placeholder="Ej: Centro" required class="w-full p-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-pink-400" />
     <label class="block text-sm font-medium text-gray-700">Slug (opcional)</label>
