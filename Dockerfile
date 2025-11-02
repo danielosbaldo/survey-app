@@ -13,7 +13,8 @@ RUN curl -sLO https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4
 
 # Copy go mod files first for better caching
 COPY go.mod go.sum ./
-RUN go mod download
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
 
 # Copy source code
 COPY . .
@@ -24,8 +25,10 @@ RUN /usr/local/bin/tailwindcss -i ./assets/web/css/tailwind.css -o ./assets/web/
 # Verify the CSS was generated
 RUN ls -lh ./assets/web/css/app.css && echo "CSS file size:" && wc -c ./assets/web/css/app.css
 
-# Build with caching
-RUN CGO_ENABLED=0 GOOS=linux go build -o server ./cmd/server
+# Build with caching - mount Go build cache and module cache for faster builds
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg/mod \
+    CGO_ENABLED=0 GOOS=linux go build -o server ./cmd/server
 
 # Final stage
 FROM alpine:latest
