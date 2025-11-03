@@ -133,5 +133,12 @@ func (h *SurveyHandler) PostForm(c *gin.Context) {
 	}
 
 	h.DB.Create(&models.Response{ShopID: shop.ID, EmployeeID: emp.ID, Answers: answers, UserAgent: c.Request.UserAgent()})
-	c.Data(200, "text/html; charset=utf-8", []byte(`<div style="font-family:system-ui;padding:24px;text-align:center"><h2>¡Gracias por tu opinión! 🍨</h2><a href="">Enviar otra</a></div>`))
+	c.Data(200, "text/html; charset=utf-8", []byte(`
+		<div style="display:flex;align-items:center;justify-content:center;min-height:60vh;font-family:system-ui;padding:24px">
+			<div style="text-align:center;max-width:600px">
+				<h2 style="font-size:2.5rem;margin-bottom:1rem;color:#2c3e50">¡Gracias por tu opinión! 🍨</h2>
+				<p style="font-size:1.125rem;color:#555;margin-bottom:2rem">Tus comentarios son muy valiosos para nosotros</p>
+			</div>
+		</div>
+	`))
 }

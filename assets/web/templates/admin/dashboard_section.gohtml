@@ -3,7 +3,29 @@
      data-responses-time="{{toJSON .ResponsesOverTime}}"
      data-responses-shop="{{toJSON .ResponsesByShop}}"
      data-question-stats="{{toJSON .QuestionStats}}">
-  <h1 class="text-2xl font-bold mb-6">Dashboard</h1>
+
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Dashboard</h1>
+
+    <!-- Shop Filter -->
+    <div class="flex items-center gap-3">
+      <label class="text-sm font-medium text-gray-700">Filtrar por sucursal:</label>
+      <select
+        hx-get="/admin/dashboard-section"
+        hx-target="#admin-refresh"
+        hx-swap="innerHTML"
+        hx-include="this"
+        name="shop_id"
+        class="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pink-400 focus:border-pink-400">
+        <option value="">Todas las sucursales</option>
+        {{range .Shops}}
+        <option value="{{.ID}}" {{if eq .ID $.SelectedShopID}}selected{{end}}>
+          {{.Name}}{{if .Ciudad}} - {{.Ciudad.Nombre}}{{end}}
+        </option>
+        {{end}}
+      </select>
+    </div>
+  </div>
 
   <!-- KPI Cards -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

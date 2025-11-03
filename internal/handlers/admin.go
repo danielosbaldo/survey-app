@@ -45,8 +45,23 @@ func (h *AdminHandler) Dashboard(c *gin.Context) {
 }
 
 func (h *AdminHandler) DashboardSection(c *gin.Context) {
-	data := getDashboardData(h.DB)
+	shopIDStr := c.Query("shop_id")
+	var shopID uint
+	if shopIDStr != "" {
+		if id, err := strconv.Atoi(shopIDStr); err == nil {
+			shopID = uint(id)
+		}
+	}
+
+	data := getDashboardData(h.DB, shopID)
 	data["Title"] = "Dashboard"
+	data["SelectedShopID"] = shopID
+
+	// Get all shops for the filter dropdown
+	var shops []models.Shop
+	h.DB.Preload("Ciudad").Order("name").Find(&shops)
+	data["Shops"] = shops
+
 	RenderTemplate(c, "dashboard_section.gohtml", data)
 }
 
@@ -110,22 +125,42 @@ func getAdminData(db *gorm.DB) gin.H {
 	}
 }
 
-func getDashboardData(db *gorm.DB) gin.H {
+func getDashboardData(db *gorm.DB, shopID uint) gin.H {
+	// Build query with optional shop filter
+	responseQuery := db.Model(&models.Response{})
+	if shopID > 0 {
+		responseQuery = responseQuery.Where("shop_id = ?", shopID)
+	}
+
 	// Total responses
 	var totalResponses int64
-	db.Model(&models.Response{}).Count(&totalResponses)
+	responseQuery.Count(&totalResponses)
 
 	// Total employees (active)
 	var totalEmployees int64
-	db.Model(&models.Employee{}).Where("active = ?", true).Count(&totalEmployees)
+	employeeQuery := db.Model(&models.Employee{}).Where("active = ?", true)
+	if shopID > 0 {
+		// Count employees assigned to this shop
+		employeeQuery = employeeQuery.Joins("JOIN employee_shops ON employee_shops.employee_id = employees.id").
+			Where("employee_shops.shop_id = ?", shopID)
+	}
+	employeeQuery.Count(&totalEmployees)
 
 	// Total shops
 	var totalShops int64
-	db.Model(&models.Shop{}).Count(&totalShops)
+	if shopID > 0 {
+		totalShops = 1 // Just the selected shop
+	} else {
+		db.Model(&models.Shop{}).Count(&totalShops)
+	}
 
-	// Get all responses for analysis
+	// Get responses for analysis
 	var responses []models.Response
-	db.Preload("Shop").Preload("Shop.Ciudad").Order("created_at desc").Find(&responses)
+	query := db.Preload("Shop").Preload("Shop.Ciudad").Order("created_at desc")
+	if shopID > 0 {
+		query = query.Where("shop_id = ?", shopID)
+	}
+	query.Find(&responses)
 
 	// Get all questions for analysis
 	var questions []models.Question
@@ -148,10 +183,16 @@ func getDashboardData(db *gorm.DB) gin.H {
 		responsesOverTime[dateKey]++
 	}
 
-	// Question response stats
-	questionStats := make(map[string]map[string]int)
+	// Question response stats - use array to preserve order and include IDs
+	type QuestionStat struct {
+		ID     uint              `json:"id"`
+		Prompt string            `json:"prompt"`
+		Stats  map[string]int    `json:"stats"`
+	}
+	questionStats := []QuestionStat{}
+
 	for _, q := range questions {
-		questionStats[q.Prompt] = make(map[string]int)
+		stats := make(map[string]int)
 		for _, r := range responses {
 			// Try both "qN" format and just "N" format
 			key := "q" + strconv.Itoa(int(q.ID))
@@ -170,10 +211,16 @@ func getDashboardData(db *gorm.DB) gin.H {
 					valStr = strconv.Itoa(int(v))
 				}
 				if valStr != "" {
-					questionStats[q.Prompt][valStr]++
+					stats[valStr]++
 				}
 			}
 		}
+
+		questionStats = append(questionStats, QuestionStat{
+			ID:     q.ID,
+			Prompt: q.Prompt,
+			Stats:  stats,
+		})
 	}
 
 	// Recent responses (last 10)
