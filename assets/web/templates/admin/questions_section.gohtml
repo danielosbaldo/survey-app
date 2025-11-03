@@ -24,6 +24,11 @@
       </div>
     </div>
 
+    <div class="flex items-center space-x-2">
+      <input type="checkbox" name="required" value="true" checked class="w-4 h-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded">
+      <label class="text-sm font-medium text-gray-700">Pregunta obligatoria</label>
+    </div>
+
     <!-- Choices Section for New Question -->
     <div id="choices-section-new">
       <div class="flex justify-between items-center mb-2">
@@ -53,8 +58,6 @@
     </button>
   </form>
 
-  <div id="questions-content">
-    {{template "questions_table.gohtml" .}}
-  </div>
+  {{template "questions_content.gohtml" .}}
 </div>
 {{end}}

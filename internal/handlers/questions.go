@@ -17,9 +17,11 @@ func (h *QuestionHandler) Create(c *gin.Context) {
 	prompt := c.PostForm("prompt")
 	t := c.PostForm("type")
 	order, _ := strconv.Atoi(c.PostForm("order"))
+	// Checkbox: if "required" field exists in form, it's checked (true), otherwise unchecked (false)
+	_, required := c.GetPostForm("required")
 
 	// Create the question
-	question := models.Question{Prompt: prompt, Type: t, OrderNum: order}
+	question := models.Question{Prompt: prompt, Type: t, Required: required, OrderNum: order}
 	if err := h.DB.Create(&question).Error; err != nil {
 		c.JSON(500, gin.H{"error": "Failed to create question"})
 		return
@@ -56,7 +58,7 @@ func (h *QuestionHandler) Create(c *gin.Context) {
 		h.DB.Create(&newChoice)
 	}
 
-	renderQuestionsTable(c, h.DB)
+	RenderTemplate(c, "questions_content.gohtml", getAdminData(h.DB))
 }
 
 func (h *QuestionHandler) Update(c *gin.Context) {
@@ -70,14 +72,18 @@ func (h *QuestionHandler) Update(c *gin.Context) {
 	prompt := c.PostForm("prompt")
 	qType := c.PostForm("type")
 	order, _ := strconv.Atoi(c.PostForm("order"))
+	// Checkbox: if "required" field exists in form, it's checked (true), otherwise unchecked (false)
+	_, required := c.GetPostForm("required")
 
-	question := models.Question{
-		Prompt:   prompt,
-		Type:     qType,
-		OrderNum: order,
+	// Use Updates with map to properly set boolean false value
+	updates := map[string]interface{}{
+		"prompt":    prompt,
+		"type":      qType,
+		"required":  required,
+		"order_num": order,
 	}
 
-	if err := h.DB.Model(&models.Question{}).Where("id = ?", qID).Updates(question).Error; err != nil {
+	if err := h.DB.Model(&models.Question{}).Where("id = ?", qID).Updates(updates).Error; err != nil {
 		c.JSON(500, gin.H{"error": "Failed to update question"})
 		return
 	}
@@ -149,7 +155,7 @@ func (h *QuestionHandler) Update(c *gin.Context) {
 		h.DB.Where("question_id = ?", qID).Delete(&models.Choice{})
 	}
 
-	renderQuestionsTable(c, h.DB)
+	RenderTemplate(c, "questions_content.gohtml", getAdminData(h.DB))
 }
 
 func (h *QuestionHandler) Delete(c *gin.Context) {
@@ -167,7 +173,7 @@ func (h *QuestionHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	renderQuestionsTable(c, h.DB)
+	RenderTemplate(c, "questions_content.gohtml", getAdminData(h.DB))
 }
 
 func (h *QuestionHandler) CreateChoice(c *gin.Context) {
@@ -206,5 +212,5 @@ func (h *QuestionHandler) Section(c *gin.Context) {
 }
 
 func renderQuestionsTable(c *gin.Context, db *gorm.DB) {
-	RenderTemplate(c, "questions_table.gohtml", getAdminData(db))
+	RenderTemplate(c, "questions_content.gohtml", getAdminData(db))
 }

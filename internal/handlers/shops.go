@@ -176,7 +176,7 @@ func renderShopsTable(c *gin.Context, db *gorm.DB) {
 	var ciudades []models.Ciudad
 	db.Find(&ciudades)
 
-	RenderTemplate(c, "shops_table.gohtml", gin.H{
+	RenderTemplate(c, "shops_content.gohtml", gin.H{
 		"Shops":    shops,
 		"Ciudades": ciudades,
 	})

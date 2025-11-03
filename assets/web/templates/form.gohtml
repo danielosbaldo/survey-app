@@ -29,13 +29,17 @@
       </div>
       {{range .Questions}}
       {{$questionID := .ID}}
+      {{$required := .Required}}
       <div class="mb-6">
-        <label class="block text-base font-semibold text-pink-700 mb-2">{{.Prompt}}</label>
+        <label class="block text-base font-semibold text-pink-700 mb-2">
+          {{.Prompt}}
+          {{if not .Required}}<span class="text-xs font-normal text-gray-500">(opcional)</span>{{end}}
+        </label>
         {{if eq .Type "radio"}}
           <div class="flex flex-col gap-3">
             {{range .Choices}}
               <label class="flex items-center bg-gray-100 rounded-xl px-4 py-3 text-base active:bg-pink-100 focus-within:ring-2 focus-within:ring-pink-400">
-                <input type="radio" name="q{{$questionID}}" value="{{.Value}}" {{if eq (index $.PreservedData (print "q" $questionID)) .Value}}checked{{end}} class="form-radio text-pink-600 w-6 h-6 mr-3" required>
+                <input type="radio" name="q{{$questionID}}" value="{{.Value}}" {{if eq (index $.PreservedData (print "q" $questionID)) .Value}}checked{{end}} class="form-radio text-pink-600 w-6 h-6 mr-3" {{if $required}}required{{end}}>
                 <span class="flex-1">{{.Label}}</span>
               </label>
             {{end}}
@@ -45,35 +49,35 @@
             {{if .Choices}}
               {{range .Choices}}
                 <label class="flex flex-col items-center flex-1">
-                  <input type="radio" name="q{{$questionID}}" value="{{.Value}}" {{if eq (index $.PreservedData (print "q" $questionID)) .Value}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" required>
+                  <input type="radio" name="q{{$questionID}}" value="{{.Value}}" {{if eq (index $.PreservedData (print "q" $questionID)) .Value}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" {{if $required}}required{{end}}>
                   <span class="text-xs">{{.Label}}</span>
                 </label>
               {{end}}
             {{else}}
               <label class="flex flex-col items-center flex-1">
-                <input type="radio" name="q{{$questionID}}" value="1" {{if eq (index $.PreservedData (print "q" $questionID)) "1"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" required>
+                <input type="radio" name="q{{$questionID}}" value="1" {{if eq (index $.PreservedData (print "q" $questionID)) "1"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" {{if $required}}required{{end}}>
                 <span class="text-xs">1</span>
               </label>
               <label class="flex flex-col items-center flex-1">
-                <input type="radio" name="q{{$questionID}}" value="2" {{if eq (index $.PreservedData (print "q" $questionID)) "2"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" required>
+                <input type="radio" name="q{{$questionID}}" value="2" {{if eq (index $.PreservedData (print "q" $questionID)) "2"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" {{if $required}}required{{end}}>
                 <span class="text-xs">2</span>
               </label>
               <label class="flex flex-col items-center flex-1">
-                <input type="radio" name="q{{$questionID}}" value="3" {{if eq (index $.PreservedData (print "q" $questionID)) "3"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" required>
+                <input type="radio" name="q{{$questionID}}" value="3" {{if eq (index $.PreservedData (print "q" $questionID)) "3"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" {{if $required}}required{{end}}>
                 <span class="text-xs">3</span>
               </label>
               <label class="flex flex-col items-center flex-1">
-                <input type="radio" name="q{{$questionID}}" value="4" {{if eq (index $.PreservedData (print "q" $questionID)) "4"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" required>
+                <input type="radio" name="q{{$questionID}}" value="4" {{if eq (index $.PreservedData (print "q" $questionID)) "4"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" {{if $required}}required{{end}}>
                 <span class="text-xs">4</span>
               </label>
               <label class="flex flex-col items-center flex-1">
-                <input type="radio" name="q{{$questionID}}" value="5" {{if eq (index $.PreservedData (print "q" $questionID)) "5"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" required>
+                <input type="radio" name="q{{$questionID}}" value="5" {{if eq (index $.PreservedData (print "q" $questionID)) "5"}}checked{{end}} class="form-radio text-pink-600 w-7 h-7 mb-1" {{if $required}}required{{end}}>
                 <span class="text-xs">5</span>
               </label>
             {{end}}
           </div>
         {{else if eq .Type "text"}}
-          <input type="text" name="q{{$questionID}}" value="{{index $.PreservedData (print "q" $questionID)}}" class="w-full p-4 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-pink-400" placeholder="Tu respuesta..." required />
+          <input type="text" name="q{{$questionID}}" value="{{index $.PreservedData (print "q" $questionID)}}" class="w-full p-4 border border-gray-300 rounded-xl text-base focus:ring-2 focus:ring-pink-400" placeholder="Tu respuesta..." {{if $required}}required{{end}} />
         {{end}}
       </div>
       {{end}}

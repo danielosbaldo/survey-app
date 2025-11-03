@@ -172,5 +172,5 @@ func (h *EmployeeHandler) Section(c *gin.Context) {
 }
 
 func renderEmployeesTable(c *gin.Context, db *gorm.DB) {
-	RenderTemplate(c, "employees_table.gohtml", getAdminData(db))
+	RenderTemplate(c, "employees_content.gohtml", getAdminData(db))
 }

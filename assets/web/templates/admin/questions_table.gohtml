@@ -2,7 +2,7 @@
 <!-- Tabla de preguntas -->
 <table class="min-w-full text-xs border rounded-xl overflow-hidden">
   <thead class="bg-gray-100">
-    <tr><th class="p-2 text-left">ID</th><th class="p-2 text-left">Pregunta</th><th class="p-2 text-left">Tipo</th><th class="p-2 text-left">Orden</th><th class="p-2 text-left">Acciones</th></tr>
+    <tr><th class="p-2 text-left">ID</th><th class="p-2 text-left">Pregunta</th><th class="p-2 text-left">Tipo</th><th class="p-2 text-left">Requerida</th><th class="p-2 text-left">Orden</th><th class="p-2 text-left">Acciones</th></tr>
   </thead>
   <tbody>
     {{range .Questions}}
@@ -23,6 +23,13 @@
         {{else if eq .Type "scale"}}Escala ({{len .Choices}} opciones)
         {{else if eq .Type "text"}}Texto libre
         {{else}}{{.Type}}{{end}}
+      </td>
+      <td class="p-2">
+        {{if .Required}}
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Sí</span>
+        {{else}}
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">No</span>
+        {{end}}
       </td>
       <td class="p-2">{{.OrderNum}}</td>
       <td class="p-2">
@@ -49,7 +56,7 @@
         </div>
       </td>
     </tr>
-    {{else}}<tr><td colspan="5" class="p-2 text-gray-400">Sin preguntas</td></tr>{{end}}
+    {{else}}<tr><td colspan="6" class="p-2 text-gray-400">Sin preguntas</td></tr>{{end}}
   </tbody>
 </table>
 {{end}}

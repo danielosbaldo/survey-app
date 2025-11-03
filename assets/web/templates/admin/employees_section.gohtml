@@ -31,9 +31,7 @@
     <button class="w-full bg-pink-700 hover:bg-pink-800 transition text-white border-0 p-3 rounded-xl font-semibold mt-2 flex items-center justify-center gap-2">Guardar empleado</button>
   </form>
 
-  <div id="employees-content">
-    {{template "employees_table.gohtml" .}}
-  </div>
+  {{template "employees_content.gohtml" .}}
 </div>
 <script src="/assets/web/js/employees_section.js"></script>
 {{end}}

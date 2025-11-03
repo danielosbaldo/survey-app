@@ -84,6 +84,7 @@ assets/**/logo.svg
 *credentials*
 *config.local*
 *SANITIZATION_SUMMARY*
+*guides/*
 
 # Deployment files (contain server IPs, usernames, etc.)
 deploy*.sh

@@ -1,24 +1,257 @@
 {{define "dashboard_section.gohtml"}}
 <div class="mb-10">
   <h1 class="text-2xl font-bold mb-6">Dashboard</h1>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-    <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center">
-      <div class="text-3xl font-bold text-pink-600 mb-2">{{.TotalResponses}}</div>
-      <div class="text-sm text-gray-500">Respuestas totales</div>
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl shadow-lg p-6 text-white">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-sm font-medium opacity-90">Respuestas Totales</div>
+        <svg class="w-8 h-8 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+      </div>
+      <div class="text-4xl font-bold">{{.TotalResponses}}</div>
     </div>
-    <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center">
-      <div class="text-3xl font-bold text-pink-600 mb-2">{{.AvgAmabilidad}}</div>
-      <div class="text-sm text-gray-500">Promedio Amabilidad</div>
+
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-sm font-medium opacity-90">Empleados Activos</div>
+        <svg class="w-8 h-8 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+        </svg>
+      </div>
+      <div class="text-4xl font-bold">{{.TotalEmployees}}</div>
     </div>
-    <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center">
-      <div class="text-3xl font-bold text-pink-600 mb-2">{{.TotalEmpleados}}</div>
-      <div class="text-sm text-gray-500">Empleados activos</div>
+
+    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-sm font-medium opacity-90">Sucursales</div>
+        <svg class="w-8 h-8 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+        </svg>
+      </div>
+      <div class="text-4xl font-bold">{{.TotalShops}}</div>
+    </div>
+
+    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-sm font-medium opacity-90">Preguntas</div>
+        <svg class="w-8 h-8 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div class="text-4xl font-bold">{{if .Questions}}{{len .Questions}}{{else}}0{{end}}</div>
     </div>
   </div>
-  <!-- Placeholder for charts -->
-  <div class="bg-white rounded-xl shadow p-6">
-    <h2 class="text-lg font-semibold mb-4">Respuestas por pregunta</h2>
-    <div id="dashboard-charts" class="h-64 flex items-center justify-center text-gray-400">[Gráficas próximamente]</div>
+
+  <!-- Charts Row -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Responses Over Time -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+        </svg>
+        Respuestas en el Tiempo
+      </h2>
+      <div style="position: relative; height: 250px;">
+        <canvas id="timeChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Responses by Shop -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+        </svg>
+        Respuestas por Sucursal
+      </h2>
+      <div style="position: relative; height: 250px;">
+        <canvas id="shopChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Question Stats -->
+  {{if .Questions}}
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    {{range $index, $question := .Questions}}
+    {{if lt $index 4}}
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-lg font-semibold mb-4 text-gray-800">{{$question.Prompt}}</h2>
+      <div style="position: relative; height: 200px;">
+        <canvas id="question-chart-{{$question.ID}}"></canvas>
+      </div>
+    </div>
+    {{end}}
+    {{end}}
+  </div>
+  {{end}}
+
+  <!-- Recent Responses Table -->
+  <div class="bg-white rounded-xl shadow-lg p-6">
+    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+      <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      Respuestas Recientes
+    </h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 border-b">
+          <tr>
+            <th class="p-3 text-left font-medium text-gray-700">ID</th>
+            <th class="p-3 text-left font-medium text-gray-700">Sucursal</th>
+            <th class="p-3 text-left font-medium text-gray-700">Fecha</th>
+            <th class="p-3 text-left font-medium text-gray-700">Respuestas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range .RecentResponses}}
+          <tr class="border-b hover:bg-gray-50">
+            <td class="p-3 text-gray-600">#{{.ID}}</td>
+            <td class="p-3 text-gray-800">{{if .Shop}}{{.Shop.Name}}{{else}}N/A{{end}}</td>
+            <td class="p-3 text-gray-600">{{.CreatedAt.Format "02/01/2006 15:04"}}</td>
+            <td class="p-3 text-gray-600">{{len .Answers}} respuestas</td>
+          </tr>
+          {{else}}
+          <tr>
+            <td colspan="4" class="p-4 text-center text-gray-400">No hay respuestas aún</td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
+
+<script>
+(function() {
+  // Destroy existing charts before creating new ones
+  if (window.dashboardCharts) {
+    window.dashboardCharts.forEach(chart => {
+      if (chart && typeof chart.destroy === 'function') {
+        chart.destroy();
+      }
+    });
+  }
+  window.dashboardCharts = [];
+
+  // Responses Over Time Chart
+{{if .ResponsesOverTime}}
+const timeCtx = document.getElementById('timeChart');
+if (timeCtx) {
+  const timeData = {{toJSON .ResponsesOverTime}};
+  const sortedDates = Object.keys(timeData).sort();
+
+  const timeChart = new Chart(timeCtx, {
+    type: 'line',
+    data: {
+      labels: sortedDates.map(d => {
+        const date = new Date(d);
+        return date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
+      }),
+      datasets: [{
+        label: 'Respuestas',
+        data: sortedDates.map(d => timeData[d]),
+        borderColor: 'rgb(219, 39, 119)',
+        backgroundColor: 'rgba(219, 39, 119, 0.1)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+      }
+    }
+  });
+  window.dashboardCharts.push(timeChart);
+}
+{{end}}
+
+// Responses by Shop Chart
+{{if .ResponsesByShop}}
+const shopCtx = document.getElementById('shopChart');
+if (shopCtx) {
+  const shopData = {{toJSON .ResponsesByShop}};
+  const colors = [
+    'rgb(219, 39, 119)', 'rgb(59, 130, 246)', 'rgb(16, 185, 129)',
+    'rgb(168, 85, 247)', 'rgb(245, 158, 11)', 'rgb(239, 68, 68)'
+  ];
+
+  const shopChart = new Chart(shopCtx, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(shopData),
+      datasets: [{
+        data: Object.values(shopData),
+        backgroundColor: colors,
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+  window.dashboardCharts.push(shopChart);
+}
+{{end}}
+
+// Question Stats Charts
+{{if .QuestionStats -}}
+const questionStats = {{toJSON .QuestionStats}};
+{{range $index, $question := .Questions}}{{if lt $index 4}}
+(function() {
+  const qCtx = document.getElementById('question-chart-{{$question.ID}}');
+  if (qCtx && questionStats['{{$question.Prompt}}']) {
+    const qData = questionStats['{{$question.Prompt}}'];
+
+    const questionChart = new Chart(qCtx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(qData),
+      datasets: [{
+        label: 'Respuestas',
+        data: Object.values(qData),
+        backgroundColor: 'rgba(219, 39, 119, 0.7)',
+        borderColor: 'rgb(219, 39, 119)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+      }
+    }
+    });
+    window.dashboardCharts.push(questionChart);
+  }
+})();
+{{end}}
+{{end}}
+{{end}}
+})(); // End of main IIFE
+</script>
 {{end}}

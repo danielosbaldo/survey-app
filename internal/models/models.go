@@ -46,6 +46,7 @@ type Question struct {
 	ID        uint   `gorm:"primaryKey"`
 	Prompt    string `gorm:"not null"`
 	Type      string `gorm:"not null"` // radio, scale, text
+	Required  bool   `gorm:"default:true"`
 	OrderNum  int    `gorm:"index"`
 	Choices   []Choice
 	CreatedAt time.Time
@@ -69,10 +70,12 @@ func (Choice) TableName() string {
 }
 
 type Response struct {
-	ID         uint  `gorm:"primaryKey"`
-	ShopID     uint  `gorm:"index;not null"`
-	EmployeeID uint  `gorm:"index;not null"`
-	Answers    JSONB `gorm:"type:jsonb"`
+	ID         uint     `gorm:"primaryKey"`
+	ShopID     uint     `gorm:"index;not null"`
+	Shop       Shop     `gorm:"foreignKey:ShopID"`
+	EmployeeID uint     `gorm:"index;not null"`
+	Employee   Employee `gorm:"foreignKey:EmployeeID"`
+	Answers    JSONB    `gorm:"type:jsonb"`
 	UserAgent  string
 	CreatedAt  time.Time
 }
