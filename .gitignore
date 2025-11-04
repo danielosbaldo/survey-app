@@ -87,8 +87,23 @@ assets/**/logo.svg
 *guides/*
 
 # Deployment files (contain server IPs, usernames, etc.)
-deploy*.sh
+deploy.sh
+deploy-remote.sh
+deploy-rollout.sh
+deploy-blue-green.sh
+deploy-remote-bg.sh
+nginx-switch.sh
+check-deployment.sh
+find-nginx-dirs.sh
+
+# Block all deployment documentation and guides (may contain sensitive data)
 *DEPLOYMENT*.md
+*SETUP*.md
+NGINX_*.md
+*_STEPS.md
+
+# Nginx configuration with sensitive data
+nginx-blue-green.conf
 
 # Backup files
 *.bak

@@ -25,6 +25,21 @@ func (s *Server) Router() *gin.Engine {
 	g.HEAD("/", func(c *gin.Context) { c.Redirect(http.StatusFound, "/") })
 	g.StaticFS("/assets", http.FS(assets.WebFS))
 
+	// Health check endpoint
+	g.GET("/health", func(c *gin.Context) {
+		// Check database connection
+		sqlDB, err := s.DB.DB()
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unhealthy", "error": "database connection error"})
+			return
+		}
+		if err := sqlDB.Ping(); err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unhealthy", "error": "database ping failed"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"status": "healthy"})
+	})
+
 	// Home
 	g.GET("/", func(c *gin.Context) {
 		c.Header("Content-Type", "text/html; charset=utf-8")
