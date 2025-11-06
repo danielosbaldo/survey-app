@@ -58,6 +58,7 @@ func (s *Server) Router() *gin.Engine {
 		shopHandler := &handlers.ShopHandler{DB: s.DB}
 		employeeHandler := &handlers.EmployeeHandler{DB: s.DB}
 		questionHandler := &handlers.QuestionHandler{DB: s.DB}
+		employeeEvaluationHandler := &handlers.EmployeeEvaluationHandler{DB: s.DB}
 
 		// Dashboard
 		admin.GET("", adminHandler.Dashboard)
@@ -87,6 +88,9 @@ func (s *Server) Router() *gin.Engine {
 		admin.PUT("/questions/:id", questionHandler.Update)
 		admin.DELETE("/questions/:id", questionHandler.Delete)
 		admin.POST("/choices", questionHandler.CreateChoice)
+
+		// Employee Evaluation
+		admin.GET("/employee-evaluation-section", employeeEvaluationHandler.Section)
 	}
 
 	return g

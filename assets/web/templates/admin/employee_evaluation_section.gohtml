@@ -1,0 +1,240 @@
+{{define "employee_evaluation_section.gohtml"}}
+<div class="mb-10" id="employee-evaluation-container"
+     data-responses-time="{{toJSON .ResponsesOverTime}}"
+     data-question-averages="{{toJSON .QuestionAverages}}">
+
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Evaluación de Empleados</h1>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Shop Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Filtrar por sucursal:</label>
+        <select
+          hx-get="/admin/employee-evaluation-section"
+          hx-target="#admin-refresh"
+          hx-swap="innerHTML"
+          hx-include="[name='employee_id']"
+          name="shop_id"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pink-400 focus:border-pink-400">
+          <option value="">Todas las sucursales</option>
+          {{range .Shops}}
+          <option value="{{.ID}}" {{if eq .ID $.SelectedShopID}}selected{{end}}>
+            {{.Name}}{{if .Ciudad}} - {{.Ciudad.Nombre}}{{end}}
+          </option>
+          {{end}}
+        </select>
+      </div>
+
+      <!-- Employee Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Filtrar por empleado:</label>
+        <select
+          hx-get="/admin/employee-evaluation-section"
+          hx-target="#admin-refresh"
+          hx-swap="innerHTML"
+          hx-include="[name='shop_id']"
+          name="employee_id"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pink-400 focus:border-pink-400">
+          <option value="">Todos los empleados</option>
+          {{range .Employees}}
+          <option value="{{.ID}}" {{if eq .ID $.SelectedEmployeeID}}selected{{end}}>
+            {{.Name}}
+          </option>
+          {{end}}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Employee Info Card (if employee is selected) -->
+  {{if .SelectedEmployee}}
+  <div class="bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl shadow-lg p-6 text-white mb-6">
+    <div class="flex items-center gap-4">
+      <div class="w-16 h-16 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-2xl font-bold">{{.SelectedEmployee.Name}}</h2>
+        <p class="text-pink-100 text-sm">
+          {{if .SelectedEmployee.Shops}}
+            Trabaja en:
+            {{range $index, $shop := .SelectedEmployee.Shops}}
+              {{if $index}}, {{end}}{{$shop.Name}}
+            {{end}}
+          {{end}}
+        </p>
+      </div>
+    </div>
+  </div>
+  {{end}}
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl shadow-lg p-6 text-white">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-sm font-medium opacity-90">Total de Evaluaciones</div>
+        <svg class="w-8 h-8 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+      </div>
+      <div class="text-4xl font-bold">{{.TotalResponses}}</div>
+    </div>
+
+    {{if .QuestionAverages}}
+    {{$firstAvg := index .QuestionAverages 0}}
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-sm font-medium opacity-90">Promedio General</div>
+        <svg class="w-8 h-8 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+        </svg>
+      </div>
+      <div class="text-4xl font-bold">
+        {{if $firstAvg.Average}}
+          {{printf "%.1f" $firstAvg.Average}}
+        {{else}}
+          N/A
+        {{end}}
+      </div>
+    </div>
+    {{end}}
+
+    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-sm font-medium opacity-90">Empleados Evaluados</div>
+        <svg class="w-8 h-8 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+      </div>
+      <div class="text-4xl font-bold">{{if .Employees}}{{len .Employees}}{{else}}0{{end}}</div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Evaluations Over Time -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+        </svg>
+        Evaluaciones en el Tiempo
+      </h2>
+      <div style="position: relative; height: 250px;">
+        <canvas id="evaluationTimeChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Amabilidad Chart -->
+    {{if .QuestionAverages}}
+    {{range .QuestionAverages}}
+    {{if or (eq .Prompt "¿Cómo calificarías la amabilidad de nuestro representante de atención al cliente?") (eq .Prompt "Amabilidad")}}
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        ¿Cómo calificarías la amabilidad?
+      </h2>
+      <div class="flex items-center justify-center mb-4">
+        <div class="text-center">
+          <div class="text-5xl font-bold text-pink-600">
+            {{if .Average}}{{printf "%.2f" .Average}}{{else}}N/A{{end}}
+          </div>
+          <div class="text-sm text-gray-500 mt-1">Promedio de {{.Total}} evaluaciones</div>
+        </div>
+      </div>
+      <div style="position: relative; height: 150px;">
+        <canvas id="amabilidadChart"></canvas>
+      </div>
+    </div>
+    {{end}}
+    {{end}}
+    {{end}}
+  </div>
+
+  <!-- Question Details -->
+  {{if .QuestionAverages}}
+  <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+      <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+      </svg>
+      Detalle por Pregunta
+    </h2>
+    <div class="space-y-4">
+      {{range .QuestionAverages}}
+      <div class="border border-gray-200 rounded-lg p-4">
+        <div class="flex justify-between items-start mb-3">
+          <h3 class="font-semibold text-gray-800 flex-1">{{.Prompt}}</h3>
+          <div class="text-right ml-4">
+            <div class="text-2xl font-bold text-pink-600">
+              {{if .Average}}
+                {{printf "%.2f" .Average}}
+              {{else}}
+                N/A
+              {{end}}
+            </div>
+            <div class="text-xs text-gray-500">{{.Total}} respuestas</div>
+          </div>
+        </div>
+        {{if .Stats}}
+        <div class="flex gap-2 flex-wrap">
+          {{range $key, $value := .Stats}}
+          <div class="bg-gray-100 px-3 py-1 rounded-full text-sm">
+            <span class="font-semibold">{{$key}}:</span> {{$value}}
+          </div>
+          {{end}}
+        </div>
+        {{end}}
+      </div>
+      {{end}}
+    </div>
+  </div>
+  {{end}}
+
+  <!-- Recent Evaluations Table -->
+  <div class="bg-white rounded-xl shadow-lg p-6">
+    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+      <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      Evaluaciones Recientes
+    </h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 border-b">
+          <tr>
+            <th class="p-3 text-left font-medium text-gray-700">ID</th>
+            <th class="p-3 text-left font-medium text-gray-700">Empleado</th>
+            <th class="p-3 text-left font-medium text-gray-700">Sucursal</th>
+            <th class="p-3 text-left font-medium text-gray-700">Fecha</th>
+            <th class="p-3 text-left font-medium text-gray-700">Respuestas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range .RecentResponses}}
+          <tr class="border-b hover:bg-gray-50">
+            <td class="p-3 text-gray-600">#{{.ID}}</td>
+            <td class="p-3 text-gray-800 font-medium">{{if .Employee}}{{.Employee.Name}}{{else}}N/A{{end}}</td>
+            <td class="p-3 text-gray-800">{{if .Shop}}{{.Shop.Name}}{{else}}N/A{{end}}</td>
+            <td class="p-3 text-gray-600">{{.CreatedAt.Format "02/01/2006 15:04"}}</td>
+            <td class="p-3 text-gray-600">{{len .Answers}} respuestas</td>
+          </tr>
+          {{else}}
+          <tr>
+            <td colspan="5" class="p-4 text-center text-gray-400">No hay evaluaciones aún</td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{{end}}
