@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -16,6 +17,8 @@ type EmployeeEvaluationHandler struct {
 func (h *EmployeeEvaluationHandler) Section(c *gin.Context) {
 	shopIDStr := c.Query("shop_id")
 	employeeIDStr := c.Query("employee_id")
+	dateFrom := c.Query("date_from")
+	dateTo := c.Query("date_to")
 
 	var shopID, employeeID uint
 	if shopIDStr != "" {
@@ -29,10 +32,12 @@ func (h *EmployeeEvaluationHandler) Section(c *gin.Context) {
 		}
 	}
 
-	data := h.getEvaluationData(shopID, employeeID)
+	data := h.getEvaluationData(shopID, employeeID, dateFrom, dateTo)
 	data["Title"] = "Evaluación de Empleados"
 	data["SelectedShopID"] = shopID
 	data["SelectedEmployeeID"] = employeeID
+	data["DateFrom"] = dateFrom
+	data["DateTo"] = dateTo
 
 	// Get all shops for the filter dropdown
 	var shops []models.Shop
@@ -52,7 +57,7 @@ func (h *EmployeeEvaluationHandler) Section(c *gin.Context) {
 	RenderTemplate(c, "employee_evaluation_section.gohtml", data)
 }
 
-func (h *EmployeeEvaluationHandler) getEvaluationData(shopID, employeeID uint) gin.H {
+func (h *EmployeeEvaluationHandler) getEvaluationData(shopID, employeeID uint, dateFrom, dateTo string) gin.H {
 	// Build query with optional filters
 	responseQuery := h.DB.Model(&models.Response{})
 	if shopID > 0 {
@@ -60,6 +65,19 @@ func (h *EmployeeEvaluationHandler) getEvaluationData(shopID, employeeID uint) g
 	}
 	if employeeID > 0 {
 		responseQuery = responseQuery.Where("employee_id = ?", employeeID)
+	}
+	// Date range filter
+	if dateFrom != "" {
+		if parsedDate, err := time.Parse("2006-01-02", dateFrom); err == nil {
+			responseQuery = responseQuery.Where("created_at >= ?", parsedDate)
+		}
+	}
+	if dateTo != "" {
+		if parsedDate, err := time.Parse("2006-01-02", dateTo); err == nil {
+			// Add one day to include the entire end date
+			endDate := parsedDate.Add(24 * time.Hour)
+			responseQuery = responseQuery.Where("created_at < ?", endDate)
+		}
 	}
 
 	// Total responses for the employee
@@ -75,6 +93,18 @@ func (h *EmployeeEvaluationHandler) getEvaluationData(shopID, employeeID uint) g
 	if employeeID > 0 {
 		query = query.Where("employee_id = ?", employeeID)
 	}
+	// Apply date filters
+	if dateFrom != "" {
+		if parsedDate, err := time.Parse("2006-01-02", dateFrom); err == nil {
+			query = query.Where("created_at >= ?", parsedDate)
+		}
+	}
+	if dateTo != "" {
+		if parsedDate, err := time.Parse("2006-01-02", dateTo); err == nil {
+			endDate := parsedDate.Add(24 * time.Hour)
+			query = query.Where("created_at < ?", endDate)
+		}
+	}
 	query.Find(&responses)
 
 	// Get all questions for analysis
@@ -85,11 +115,11 @@ func (h *EmployeeEvaluationHandler) getEvaluationData(shopID, employeeID uint) g
 
 	// Calculate average scores per question
 	type QuestionAverage struct {
-		ID      uint               `json:"id"`
-		Prompt  string             `json:"prompt"`
-		Average float64            `json:"average"`
-		Total   int                `json:"total"`
-		Stats   map[string]int     `json:"stats"`
+		ID      uint           `json:"id"`
+		Prompt  string         `json:"prompt"`
+		Average float64        `json:"average"`
+		Total   int            `json:"total"`
+		Stats   map[string]int `json:"stats"`
 	}
 
 	questionAverages := []QuestionAverage{}
@@ -156,6 +186,18 @@ func (h *EmployeeEvaluationHandler) getEvaluationData(shopID, employeeID uint) g
 	if employeeID > 0 {
 		recentQuery = recentQuery.Where("employee_id = ?", employeeID)
 	}
+	// Apply date filters to recent responses
+	if dateFrom != "" {
+		if parsedDate, err := time.Parse("2006-01-02", dateFrom); err == nil {
+			recentQuery = recentQuery.Where("created_at >= ?", parsedDate)
+		}
+	}
+	if dateTo != "" {
+		if parsedDate, err := time.Parse("2006-01-02", dateTo); err == nil {
+			endDate := parsedDate.Add(24 * time.Hour)
+			recentQuery = recentQuery.Where("created_at < ?", endDate)
+		}
+	}
 	recentQuery.Find(&recentResponses)
 
 	// Get employee info if selected
@@ -168,11 +210,11 @@ func (h *EmployeeEvaluationHandler) getEvaluationData(shopID, employeeID uint) g
 	}
 
 	return gin.H{
-		"TotalResponses":     totalResponses,
-		"ResponsesOverTime":  responsesOverTime,
-		"QuestionAverages":   questionAverages,
-		"RecentResponses":    recentResponses,
-		"Questions":          questions,
-		"SelectedEmployee":   selectedEmployee,
+		"TotalResponses":    totalResponses,
+		"ResponsesOverTime": responsesOverTime,
+		"QuestionAverages":  questionAverages,
+		"RecentResponses":   recentResponses,
+		"Questions":         questions,
+		"SelectedEmployee":  selectedEmployee,
 	}
 }
